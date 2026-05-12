@@ -109,8 +109,9 @@ graph TD;
 
 The agent coordinates a controlled pipeline rather than independently valuing the company. Figure 2 shows the full target architecture, from the banker's request through to the final output and governance layer.
 
-```mermaid
 %%{ Figure 2: Target architecture for an M&A valuation agent }%%
+
+```mermaid
 graph TD;
     U[Banker / Associate / Valuation Analyst] --> UI[Valuation Copilot UI]
 
