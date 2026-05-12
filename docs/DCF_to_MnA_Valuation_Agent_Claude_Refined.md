@@ -818,7 +818,6 @@ After running the model:
 Once the DCF agent works, the same pattern extends naturally to a broader platform. Figure 6 shows how the same financial snapshot that feeds the DCF can simultaneously feed a trading comps agent, a transaction comps agent, an LBO screener, and a synergy model — all converging into a single valuation range that populates a football field and, ultimately, pitch book or board materials.
 
 ```mermaid
-graph TD;
 flowchart LR
     A[Target Company] --> B[Financial Snapshot]
     B --> C[DCF Agent]
