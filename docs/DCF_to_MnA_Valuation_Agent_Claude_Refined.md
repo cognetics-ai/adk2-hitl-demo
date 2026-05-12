@@ -111,7 +111,7 @@ The agent coordinates a controlled pipeline rather than independently valuing th
 
 ```mermaid
 %%{ Figure 2: Target architecture for an M&A valuation agent }%%
-flowchart TB
+graph TD;
     U[Banker / Associate / Valuation Analyst] --> UI[Valuation Copilot UI]
 
     UI --> ADK[Google ADK 2.0 Workflow Agent]
