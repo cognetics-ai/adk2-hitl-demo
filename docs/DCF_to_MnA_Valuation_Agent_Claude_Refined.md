@@ -559,7 +559,6 @@ For M&A, an explicit workflow graph is preferable to a purely autonomous agent. 
 
 ```mermaid
 graph TD;
-stateDiagram-v2
     [*] --> ResolveCompany
     ResolveCompany --> RetrievePublicFilings
     RetrievePublicFilings --> NormalizeFinancials
