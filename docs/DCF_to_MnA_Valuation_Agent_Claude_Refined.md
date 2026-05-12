@@ -558,7 +558,7 @@ In production, this free-text interaction should be replaced with a structured U
 For M&A, an explicit workflow graph is preferable to a purely autonomous agent. Valuation is sequential. The system should not jump ahead. Figure 4 shows the state machine: each stage gates the next, and the human assumption review has an explicit loop back for cases where inputs are missing or need revision before the DCF tool is called.
 
 ```mermaid
-graph TD;
+stateDiagram-v2
     [*] --> ResolveCompany
     ResolveCompany --> RetrievePublicFilings
     RetrievePublicFilings --> NormalizeFinancials
