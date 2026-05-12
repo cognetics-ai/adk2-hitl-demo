@@ -88,9 +88,9 @@ A DCF has two very different categories of inputs, and treating them the same is
 
 A good M&A valuation agent must know the difference. It should retrieve the first category and ask for the second. Figure 1 shows what that separation looks like in practice: the LLM owns the top of the flow, the deterministic Python engine sits at the bottom, and the two are connected by a controlled handoff through human assumption capture.
 
+
 ```mermaid
-%%{ Figure 1: The LLM as workflow coordinator — deterministic engine handles the math }%%
-flowchart LR
+graph TD;
     A[LLM Agent] -->|Understands request| B[Workflow Orchestration]
     B --> C[Company Lookup]
     B --> D[SEC / EDGAR Retrieval]
