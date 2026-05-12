@@ -655,7 +655,6 @@ A real banking workflow would add entitlement checks before retrieval, source cl
 Figure 5 maps the full message flow between the banker, the UI, the agent, and each tool. It shows two things that are easy to miss in a simple demo: first, that the human input node is a genuine pause in execution, not a prompt injection; second, that sources and assumptions are persisted to an audit store as a separate step before the result is returned to the banker.
 
 ```mermaid
-graph TD;
 sequenceDiagram
     actor Banker as Banker / Associate
     participant UI as Valuation Copilot UI
