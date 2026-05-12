@@ -465,8 +465,7 @@ An agent can retrieve historical revenue from a 10-K. It should not silently dec
 The agent should surface what it has, flag what it needs, and ask the banker to supply the rest. Figure 3 shows the decision logic: when the historical snapshot is in place, the agent checks whether all required DCF inputs are present. If not, it generates an assumption request, validates the response, and loops back if anything is implausible or out of range.
 
 ```mermaid
-%%{ Figure 3: Human assumption capture decision flow }%%
-flowchart TD
+graph TD;
     A[Agent has historical snapshot] --> B{Are required DCF inputs complete?}
     B -->|Yes| C[Run DCF Tool]
     B -->|No| D[Generate Assumption Request]
@@ -559,7 +558,7 @@ In production, this free-text interaction should be replaced with a structured U
 For M&A, an explicit workflow graph is preferable to a purely autonomous agent. Valuation is sequential. The system should not jump ahead. Figure 4 shows the state machine: each stage gates the next, and the human assumption review has an explicit loop back for cases where inputs are missing or need revision before the DCF tool is called.
 
 ```mermaid
-%%{ Figure 4: Valuation workflow state machine }%%
+graph TD;
 stateDiagram-v2
     [*] --> ResolveCompany
     ResolveCompany --> RetrievePublicFilings
@@ -657,7 +656,7 @@ A real banking workflow would add entitlement checks before retrieval, source cl
 Figure 5 maps the full message flow between the banker, the UI, the agent, and each tool. It shows two things that are easy to miss in a simple demo: first, that the human input node is a genuine pause in execution, not a prompt injection; second, that sources and assumptions are persisted to an audit store as a separate step before the result is returned to the banker.
 
 ```mermaid
-%%{ Figure 5: End-to-end interaction sequence }%%
+graph TD;
 sequenceDiagram
     actor Banker as Banker / Associate
     participant UI as Valuation Copilot UI
@@ -821,7 +820,7 @@ After running the model:
 Once the DCF agent works, the same pattern extends naturally to a broader platform. Figure 6 shows how the same financial snapshot that feeds the DCF can simultaneously feed a trading comps agent, a transaction comps agent, an LBO screener, and a synergy model — all converging into a single valuation range that populates a football field and, ultimately, pitch book or board materials.
 
 ```mermaid
-%%{ Figure 6: Extended M&A valuation workbench }%%
+graph TD;
 flowchart LR
     A[Target Company] --> B[Financial Snapshot]
     B --> C[DCF Agent]
