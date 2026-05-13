@@ -20,6 +20,16 @@ The target audience is technical teams supporting Investment Banking and M&A pla
 
 The goal is not to replace analysts. It is to make the valuation workflow repeatable, explainable, and easier to govern.
 
+## How To Read This Article
+
+This article should be read as a reference architecture and prototype walkthrough, not as a production deployment blueprint for M&A.
+
+That distinction matters. The DCF model implementation shown here would need independent validation and model risk review before it could support a bank work product. The data layer is intentionally narrow and will fail on common deal scenarios such as private companies, carve-outs, segment-level valuations, non-US filers, data room materials, licensed market data, management cases, pro forma adjustments, and synergy cases. The M&A methodology coverage is also thin relative to what a pitch book, fairness opinion support package, or board memo actually requires.
+
+The governance framing is similarly aspirational. It names the right categories: lineage, entitlement, assumption ownership, auditability, and model versioning. It does not provide the regulatory detail, control evidence, surveillance integration, retention policy, approval workflow, or technology risk treatment that a bank's legal, compliance, model risk, and platform engineering teams would require.
+
+The right framing for the work is this: a reference architecture for a governed valuation agent, built around a deterministic DCF engine, intended as a prototype layer for further institutional hardening. That is a meaningful contribution. The gap between prototype and production in a regulated M&A context is large, and being explicit about that gap serves technical readers better than implying the prototype is ready for production use.
+
 ## Why This Matters In An M&A Environment
 
 In M&A, a DCF is not just a calculation. It is a work product.
@@ -338,16 +348,16 @@ The model does not ask for a single growth rate or a flat forecast period. It us
 |---|---|
 | `revenue_growth_rate_cycle1_begin` | Growth rate at the start of the high-growth phase |
 | `revenue_growth_rate_cycle1_end` | Growth rate at the end of cycle 1 |
-| `revenue_convergance_periods_cycle1` | How quickly growth decelerates within cycle 1 |
-| `length_of_cylcle1` | How many years cycle 1 lasts |
+| `revenue_convergence_periods_cycle1` | Year in cycle 1 when growth begins converging toward the cycle-end rate |
+| `length_of_cycle1` | How many years cycle 1 lasts |
 | `revenue_growth_rate_cycle2_begin` | Growth rate entering the transition phase |
 | `revenue_growth_rate_cycle2_end` | Growth rate exiting the transition phase |
-| `revenue_convergance_periods_cycle2` | Deceleration speed within cycle 2 |
-| `length_of_cylcle2` | Duration of cycle 2 |
+| `revenue_convergence_periods_cycle2` | Year in cycle 2 when growth begins converging toward the cycle-end rate |
+| `length_of_cycle2` | Duration of cycle 2 |
 | `revenue_growth_rate_cycle3_begin` | Growth rate entering the mature phase |
 | `revenue_growth_rate_cycle3_end` | Terminal growth rate |
-| `revenue_convergance_periods_cycle3` | Deceleration speed within cycle 3 |
-| `length_of_cylcle3` | Duration of the explicit mature phase before terminal value |
+| `revenue_convergence_periods_cycle3` | Year in cycle 3 when growth begins converging toward terminal growth |
+| `length_of_cycle3` | Duration of the explicit mature phase before terminal value |
 
 The terminal growth rate is cycle 3's ending rate. It should not exceed the risk-free rate in the governed workflow.
 
@@ -511,10 +521,10 @@ REQUIRED_DCF_KEYS = [
     "revenue_growth_rate_cycle1_begin", "revenue_growth_rate_cycle1_end",
     "revenue_growth_rate_cycle2_begin", "revenue_growth_rate_cycle2_end",
     "revenue_growth_rate_cycle3_begin", "revenue_growth_rate_cycle3_end",
-    "revenue_convergance_periods_cycle1",
-    "revenue_convergance_periods_cycle2",
-    "revenue_convergance_periods_cycle3",
-    "length_of_cylcle1", "length_of_cylcle2", "length_of_cylcle3",
+    "revenue_convergence_periods_cycle1",
+    "revenue_convergence_periods_cycle2",
+    "revenue_convergence_periods_cycle3",
+    "length_of_cycle1", "length_of_cycle2", "length_of_cycle3",
     "current_sales_to_capital_ratio", "terminal_sales_to_capital_ratio",
     "year_sales_to_capital_begins_to_converge_to_terminal_sales_to_capital",
     "current_operating_margin", "terminal_operating_margin",
@@ -803,13 +813,16 @@ class DCFUserAssumptions(BaseModel):
     marginal_tax_rate: float
     revenue_growth_rate_cycle1_begin: float
     revenue_growth_rate_cycle1_end: float
-    length_of_cylcle1: int
+    length_of_cycle1: int
+    revenue_convergence_periods_cycle1: int | None = None
     revenue_growth_rate_cycle2_begin: float
     revenue_growth_rate_cycle2_end: float
-    length_of_cylcle2: int
+    length_of_cycle2: int
+    revenue_convergence_periods_cycle2: int | None = None
     revenue_growth_rate_cycle3_begin: float
     revenue_growth_rate_cycle3_end: float
-    length_of_cylcle3: int
+    length_of_cycle3: int
+    revenue_convergence_periods_cycle3: int | None = None
     current_sales_to_capital_ratio: float
     terminal_sales_to_capital_ratio: float
     terminal_operating_margin: float
@@ -835,6 +848,7 @@ I still need forward-looking assumptions to run the DCF:
 - Pre-tax cost of debt (current and terminal)
 - Marginal tax rate
 - Three-phase revenue growth (start rate, end rate, years per phase)
+- Optional revenue convergence year for each phase; defaults to the phase length
 - Sales-to-capital ratio (current and terminal)
 - Terminal operating margin
 - Long-run excess return on capital, if any
@@ -925,9 +939,18 @@ def merge_inputs_node(node_input: dict) -> dict:
     params["year_beta_begins_to_converge_to_terminal_beta"] = 1
     params["year_cost_of_debt_begins_to_converge_to_terminal_cost_of_debt"] = 3
     params["year_effective_tax_rate_begin_to_converge_marginal_tax_rate"] = 1
-    params["revenue_convergance_periods_cycle1"] = 1
-    params["revenue_convergance_periods_cycle2"] = 1
-    params["revenue_convergance_periods_cycle3"] = 1
+    params["revenue_convergence_periods_cycle1"] = (
+        assumptions.get("revenue_convergence_periods_cycle1")
+        or assumptions["length_of_cycle1"]
+    )
+    params["revenue_convergence_periods_cycle2"] = (
+        assumptions.get("revenue_convergence_periods_cycle2")
+        or assumptions["length_of_cycle2"]
+    )
+    params["revenue_convergence_periods_cycle3"] = (
+        assumptions.get("revenue_convergence_periods_cycle3")
+        or assumptions["length_of_cycle3"]
+    )
     params["year_sales_to_capital_begins_to_converge_to_terminal_sales_to_capital"] = 1
     params["year_operating_margin_begins_to_converge_to_terminal_operating_margin"] = 1
 
@@ -1033,6 +1056,8 @@ The control requirement is the same as for the base case: the user approves the 
 ## Production Controls For Banking Environments
 
 Before any of this goes into a production environment, technical teams should treat it as a controlled workflow, not a productivity feature.
+
+The controls below are design categories, not a complete control framework. A production bank deployment would still require formal model validation, legal and compliance review, entitlement enforcement, data retention policy, supervisory review, operational resilience controls, change management, and evidence that the workflow behaves consistently under real deal conditions.
 
 ### Entitlement And Data Classification
 
@@ -1165,6 +1190,8 @@ The most important lesson from turning a DCF notebook into an agent is a design 
 The valuation model should be deterministic, tested, and versioned. The LLM should orchestrate company lookup, filing retrieval, financial normalization, assumption collection, validation, tool execution, explanation, and audit logging.
 
 A demo that asks an LLM to "value this company" is interesting. A governed agentic valuation pipeline is useful.
+
+The prototype in this article is a starting point for that pipeline, not the pipeline itself. Production M&A workflows require broader methodology coverage, deeper data handling, model validation, approval controls, and regulatory substance before they can support pitch books, fairness opinion work, board materials, or deal committee review.
 
 The future of M&A technology is not replacing deal teams with agents. It is giving them better infrastructure: tools that reduce manual effort, preserve judgment, improve traceability, and make valuation work easier to review.
 
