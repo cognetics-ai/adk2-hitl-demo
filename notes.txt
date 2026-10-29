@@ -1,0 +1,34 @@
+--postgres/Coke1955
+
+CREATE DATABASE adk_demo_db WITH ENCODING = 'UTF8';
+
+-- list dbs
+\l
+
+-- connect
+\c adk_demo_db
+
+CREATE SCHEMA IF NOT EXISTS adk_store;
+
+CREATE USER adk_demo WITH PASSWORD 'adk_demo';
+GRANT CONNECT ON DATABASE adk_demo_db TO adk_demo;
+GRANT ALL ON SCHEMA adk_store TO adk_demo;
+
+cd /Users/sdangi/PycharmProjects/EverCore_AgenticWorkflow_IB
+source .venv/bin/activate
+export ADK_DEMO_DATABASE_URL='postgresql+asyncpg://adk_demo:adk_demo@127.0.0.1:5432/adk_demo_db'
+export ADK_DEMO_DB_SCHEMA='adk_store'
+export SEC_USER_AGENT='sdangi@cognetics.ai'
+
+--backend
+
+
+--front end
+ VITE_API_BASE=http://127.0.0.1:8000 npm run dev
+
+ .venv/bin/uvicorn api.app:app --reload --port 8000
+
+
+ cd frontend
+npm install
+npm run dev

@@ -1,0 +1,21 @@
+[project]
+name = "evercore-agenticworkflow-ib"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiosqlite>=0.21.0",
+    "asyncpg>=0.30.0",
+    "fastapi>=0.136.1",
+    "google-adk==2.0.0b1",
+    "numpy>=2.4.4",
+    "openpyxl>=3.1.5",
+    "openturns>=1.27",
+    "pandas>=2.3.3",
+    "plotly>=6.7.0",
+    "pydantic>=2.13.3",
+    "requests>=2.32.5",
+    "scipy>=1.17.1",
+    "uvicorn>=0.38.0",
+]
